@@ -26,7 +26,7 @@ class Header extends Component {
         if (newList.length) {
             for (let i = (page - 1) * 10; i < page * 10; i++) {
                 pageList.push(
-                    <SearchItem key={newList[i]} >{newList[i]}</SearchItem>
+                    <SearchItem key={newList[i] } >{newList[i]}</SearchItem>
                 )
             }
         }
@@ -56,7 +56,7 @@ class Header extends Component {
         }
     }
     render () {
-        const { focused, handleInputBlur, handleInputFocus} = this.props;
+        const { focused, handleInputBlur, handleInputFocus, list} = this.props;
         return (
             <HeaderWrapper>
                 <Logo href='/' /> 
@@ -75,7 +75,7 @@ class Header extends Component {
                         >
                         <NavSearch
                             onBlur={handleInputBlur}
-                            onFocus={handleInputFocus}
+                            onFocus={() => handleInputFocus(list)}
                             className={focused ? 'focused' : ''}
                         ></NavSearch>
                         
@@ -111,8 +111,10 @@ const mapStateToProps = (state) => {
 }
 const mapActionToProps = (dispatch) => {
     return {
-        handleInputFocus () {
-            dispatch(actionCreators.getList());
+        handleInputFocus (list) {
+            if (list.size === 0) {
+                dispatch(actionCreators.getList());
+            }
             dispatch(actionCreators.searchFocus());
         },
         handleInputBlur () {
