@@ -18,22 +18,34 @@ import { CSSTransition } from 'react-transition-group'
 import {connect} from 'react-redux';
 import { actionCreators } from './store';
 
-
 class Header extends Component {
     getLIstArea = () => {
-        const { focused, list }  = this.props;
-        if (focused) {
+        const { focused, list, page, totalPage, mouseIn, handleMouseEnter, handleMouseLeave, handleChangePage}  = this.props;
+        const newList = list.toJS();
+        const pageList = []
+        if (newList.length) {
+            for (let i = (page - 1) * 10; i < page * 10; i++) {
+                pageList.push(
+                    <SearchItem key={newList[i]} >{newList[i]}</SearchItem>
+                )
+            }
+        }
+        
+        if (focused || mouseIn) {
             return (
-                <SearchInfo>
+                <SearchInfo 
+                onMouseEnter={handleMouseEnter}
+                onMouseLeave={handleMouseLeave}>
                     <SearchTitle>
                         热门搜索
-                        <SearchInfoSwitch>换一批</SearchInfoSwitch>
+                        <SearchInfoSwitch onClick={() => handleChangePage(page, totalPage)}>换一批</SearchInfoSwitch>
                     </SearchTitle>
                     <SearchInfoList>
                         {
-                            list.map((item, index) => {
-                                return <SearchItem key={index} >{item}</SearchItem> 
-                            })
+                            pageList
+                            // list.map((item, index) => {
+                            //     return  <SearchItem key={item} >{item}</SearchItem>
+                            // })
                         }
                         
                     </SearchInfoList>
@@ -91,17 +103,34 @@ const mapStateToProps = (state) => {
         // focused: state.header.get('focused') redux
         focused: state.getIn(['header', 'focused']),
         // focused: state.get('header').get('focused') // redux-immutable
-        list: state.getIn(['header', 'list'])
+        list: state.getIn(['header', 'list']),
+        page: state.getIn(['header', 'page']),
+        totalPage: state.getIn(['header', 'totalPage']), 
+        mouseIn: state.getIn(['header', 'mouseIn'])
     }
 }
 const mapActionToProps = (dispatch) => {
     return {
         handleInputFocus () {
             dispatch(actionCreators.getList());
-            dispatch(actionCreators.searchFocus())
+            dispatch(actionCreators.searchFocus());
         },
         handleInputBlur () {
-            dispatch(actionCreators.searchBlur())
+            dispatch(actionCreators.searchBlur());
+        },
+        handleMouseEnter () {
+            dispatch(actionCreators.mouseEnter());
+        },
+        handleMouseLeave () {
+            dispatch(actionCreators.mouseLeave()); 
+        },
+        handleChangePage (page, totalPage) {
+            if (page < totalPage) {
+                dispatch(actionCreators.changePage(page + 1))
+            } else {
+                dispatch(actionCreators.changePage(1)) 
+            }
+            
         }
     }   
 }
